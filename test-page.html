@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Tel Local Time Test</title>
+<style>*,*::before,*::after{transition:none !important;animation:none !important}</style>
+</head>
+<body>
+  <h1>Tel links</h1>
+  <p><a href="tel:+12024561111">NYC</a></p>
+  <p><a href="tel:+12125551234">NYC +1 format</a></p>
+  <p><a href="tel:+1 (415) 555-0100;ext=22">SF with ext</a></p>
+  <p><a href="tel:1-602-555-0100?body=hi">Phoenix (no DST)</a></p>
+  <p><a href="tel:4235551234">Tennessee 423</a></p>
+  <p><a href="tel:+18005551234">Toll-free</a></p>
+  <p><a href="tel:+442071838750">UK</a></p>
+  <p><a href="mailto:a@b.com">mailto</a></p>
+  <!-- long wrapping link -->
+  <p style="width:200px;">
+    <a href="tel:+12025550199">Very long link text that wraps across two lines to test tooltip positioning</a>
+  </p>
+  <!-- bottom right link -->
+  <div style="position:absolute; bottom:0; right:0;">
+    <a href="tel:+12125556789">Bottom right link (scroll needed)</a>
+  </div>
+
+  <iframe src="/test-iframe.html"></iframe>
+</body>
+</html>
