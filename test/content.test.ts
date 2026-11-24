@@ -61,7 +61,7 @@ describe('hover behavior', () => {
     expect(tooltipText()).toBeNull();
     vi.advanceTimersByTime(1);
     const text = tooltipText();
-    expect(text).toContain('Likely local time');
+    expect(text).toContain('Washington D.C.');
     for (const line of formatAllZones(['America/New_York'])) expect(text).toContain(line);
   });
 

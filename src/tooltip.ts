@@ -2,10 +2,9 @@ let host: HTMLDivElement | null = null;
 let shadow: ShadowRoot | null = null;
 let tipEl: HTMLDivElement | null = null;
 let linesContainer: HTMLDivElement | null = null;
-let labelEl: HTMLDivElement | null = null;
 
 function ensureHost(): void {
-  if (host && shadow && tipEl && linesContainer && labelEl) return;
+  if (host && shadow && tipEl && linesContainer) return;
 
   host = document.createElement("div");
   host.style.all = "initial";
@@ -31,18 +30,13 @@ function ensureHost(): void {
       box-shadow: 0 2px 8px rgba(0,0,0,.35);
       white-space: nowrap;
     }
-    .tip .label { opacity: .7; font-size: 12px; margin-bottom: 2px; }
+    .loc { font-weight: 600; }
   `;
   shadow.appendChild(style);
 
   tipEl = document.createElement("div");
   tipEl.className = "tip";
   tipEl.style.display = "none";
-
-  labelEl = document.createElement("div");
-  labelEl.className = "label";
-  labelEl.textContent = "Likely local time";
-  tipEl.appendChild(labelEl);
 
   linesContainer = document.createElement("div");
   linesContainer.className = "lines";
@@ -51,10 +45,25 @@ function ensureHost(): void {
   shadow.appendChild(tipEl);
 }
 
-function updateContent(lines: string[]) {
-  if (!linesContainer) return;
+export interface TooltipContent {
+  location: string | null;
+  lines: string[];
+}
+
+function updateContent(content: TooltipContent) {
+  if (!linesContainer || !tipEl) return;
   while (linesContainer.firstChild) linesContainer.removeChild(linesContainer.firstChild);
-  for (const line of lines) {
+  const existingLoc = tipEl.querySelector('.loc');
+  if (existingLoc) existingLoc.remove();
+
+  if (content.location) {
+    const locDiv = document.createElement("div");
+    locDiv.className = "loc";
+    locDiv.textContent = content.location;
+    tipEl.insertBefore(locDiv, linesContainer);
+  }
+
+  for (const line of content.lines) {
     const div = document.createElement("div");
     div.textContent = line;
     linesContainer.appendChild(div);
@@ -90,7 +99,7 @@ function positionTip(anchor: Element, tip: HTMLDivElement) {
 
 let intervalId: number | null = null;
 
-export function showTooltip(anchor: Element, lines: () => string[]): void {
+export function showTooltip(anchor: Element, getContent: () => TooltipContent): void {
   ensureHost();
   if (!tipEl) return;
   if (intervalId !== null) {
@@ -98,12 +107,12 @@ export function showTooltip(anchor: Element, lines: () => string[]): void {
     intervalId = null;
   }
   const render = () => {
-    const arr = lines();
-    if (arr.length === 0) {
+    const content = getContent();
+    if (content.lines.length === 0) {
       hideTooltip();
       return;
     }
-    updateContent(arr);
+    updateContent(content);
     positionTip(anchor, tipEl!);
   };
   render();

@@ -1,6 +1,6 @@
 # Tel Local Time
 
-Hover a `tel:` link on any page to see the current local time for that phone number's area code. The extension makes no network requests at runtime; the build downloads the zone table (or uses `.cache` if available).
+Hover a `tel:` link on any page to see the current local time for that phone number's area code. Location names are derived from Google libphonenumber geocoding data (English 1.txt) when available, falling back to timezone labels. The extension makes no network requests at runtime; both the zone map and geocoding file are downloaded once at build via `scripts/fetch-zones.mjs` and cached in `.cache/`.
 
 ## Build
 
@@ -9,7 +9,7 @@ npm ci
 npm run build
 ```
 
-The build downloads the zone table, bundles the content script with Vite (IIFE), runs the TypeScript type checker, and verifies no network APIs are present.
+The build downloads the zone map and geocoding data, bundles the content script with Vite (IIFE), runs the TypeScript type checker, and verifies no network APIs are present.
 
 ## Run tests
 
@@ -33,14 +33,19 @@ make e2e                 # same via Makefile
 
 Hover each link to see the tooltip.
 
-## Zone table
+## Data
 
-The zone table is generated at build time by `scripts/fetch-zones.mjs` from Google's libphonenumber map_data.txt. The file is cached in `.cache/map_data.txt`. Rebuild to refresh.
+Zone mapping (`src/generated/zones.json`) and geocoding table (`src/generated/locations.json`) are generated at build time by `scripts/fetch-zones.mjs`:
+- Zones from libphonenumber `resources/timezones/map_data.txt`
+- Locations from libphonenumber `resources/geocoding/en/1.txt`
+
+Both source files are cached in `.cache/` and regenerated only when changed. The runtime bundle is fully offline.
 
 ## Limitations
 
 - Time is based on area code only; mobile numbers may be elsewhere.
-- Some area codes span multiple time zones; all are shown.
+- Geocoding names use English libphonenumber geocoding data and are 4–10-digit prefix based (longest-prefix match). Non-US NANP prefixes are excluded at runtime.
+- Some area codes span multiple time zones; all times are shown when no geocoded location is available.
 - Toll-free and non-geographic numbers show nothing.
 - Tooltip does not appear for links inside closed shadow roots.
-- Zone data is a snapshot from the last build.
+- Zone and location data are snapshots from the last build.

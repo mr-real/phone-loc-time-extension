@@ -1,6 +1,7 @@
 import { parseTelHref } from "./parse";
 import { lookupZones } from "./zones";
 import { formatAllZones } from "./format";
+import { lookupLocation } from "./locations";
 import { showTooltip, hideTooltip } from "./tooltip";
 
 let currentAnchor: HTMLAnchorElement | null = null;
@@ -35,9 +36,14 @@ function handleMouseOver(e: MouseEvent) {
     clearPending();
     pendingTimer = window.setTimeout(() => {
       currentAnchor = a;
-      const lines = formatAllZones(zones);
-      if (lines.length === 0) return;
-      showTooltip(a, () => formatAllZones(zones));
+      const location = lookupLocation(parsed.national);
+      const getContent = () => ({
+        location,
+        lines: formatAllZones(zones, new Date(), undefined, { placeNames: location === null }),
+      });
+      const firstLines = getContent().lines;
+      if (firstLines.length === 0) return;
+      showTooltip(a, getContent);
     }, 150);
   } catch {
     // ignore
